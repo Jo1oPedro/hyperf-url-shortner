@@ -10,6 +10,8 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 use Hyperf\Contract\ApplicationInterface;
+use Hyperf\Contract\ConfigInterface;
+use Hyperf\Database\Migrations\Migrator;
 use Hyperf\Di\ClassLoader;
 use Hyperf\Engine\DefaultOption;
 
@@ -30,3 +32,13 @@ ClassLoader::init();
 $container = require BASE_PATH . '/config/container.php';
 
 $container->get(ApplicationInterface::class);
+
+if (($container->get(ConfigInterface::class)->get('app_env')) === 'testing') {
+    $migrator = $container->get(Migrator::class);
+
+    if (! $migrator->repositoryExists()) {
+        $migrator->getRepository()->createRepository();
+    }
+
+    $migrator->run([BASE_PATH . '/migrations']);
+}
