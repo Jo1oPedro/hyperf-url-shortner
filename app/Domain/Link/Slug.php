@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
 namespace App\Domain\Link;
 
-readonly class Slug
+final readonly class Slug
 {
     private string $slug;
     public function __construct($slug)

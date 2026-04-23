@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
 namespace App\Domain\Link;
 
-class RandomSlugGenerator implements SlugGenerator
+final class RandomSlugGenerator implements SlugGenerator
 {
     public function generate(int $length = 7): Slug
     {
