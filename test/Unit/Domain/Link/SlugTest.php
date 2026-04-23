@@ -6,10 +6,30 @@ namespace HyperfTest\Unit\Domain\Link;
 
 use App\Domain\Link\Slug;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class SlugTest extends TestCase
 {
+    public static function slugs_invalidos(): array
+    {
+        return [
+            "muito curto" => ["abc"],
+            "muito longo" => ["slug-com-dezessete-c"],
+            "com arroba" => ["slug@invalido"],
+            "com espaco" => ["slug invalido"],
+            "com ponto" => ["slug.invalido"],
+        ];
+    }
+
+    public static function random_slugs_invalidos(): array
+    {
+        return [
+            "muito longo" => [17],
+            "muito curto" => [3]
+        ];
+    }
+
     public function test_aceita_slug_valido(): void
     {
         $slug = new Slug('meu-link');
@@ -17,32 +37,20 @@ class SlugTest extends TestCase
         $this->assertInstanceOf(Slug::class, $slug);
     }
 
-    public function test_rejeita_slug_muito_curto(): void
+    #[DataProvider("slugs_invalidos")]
+    public function test_rejeita_slug_invalido(string $slug): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        new Slug('abc');
+        new Slug($slug);
     }
 
-    public function test_rejeita_caractere_proibido(): void
+    #[DataProvider("random_slugs_invalidos")]
+    public function test_rejeita_random_slug_invalido(int $slugLength): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        new Slug('slug@invalido');
-    }
-
-    public function test_rejeita_random_slug_muito_curto(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        Slug::random(3);
-    }
-
-    public function test_rejeita_random_slug_muito_longo(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        Slug::random(17);
+        Slug::random($slugLength);
     }
 
     public function test_aceita_random_slug_sem_tamanho_informado_valido(): void
