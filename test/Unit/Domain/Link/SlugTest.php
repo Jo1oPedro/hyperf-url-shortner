@@ -61,4 +61,11 @@ class SlugTest extends TestCase
         $this->assertInstanceOf(Slug::class, $slug);
         $this->assertSame($length, strlen((string) $slug));
     }
+
+    public function test_to_string_retorna_slug_valido(): void
+    {
+        $slug = Slug::random();
+
+        $this->assertIsString((string) $slug);
+    }
 }
