@@ -3,25 +3,24 @@
 namespace HyperfTest\Unit\Domain\Link;
 
 use App\Domain\Link\LinkStatus;
-use App\Domain\Link\RandomSlugGenerator;
-use App\Domain\Link\Slug;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class LinkStatusTest extends TestCase
 {
-    public function test_active_tem_valor_active(): void
+    public static function status_e_valor_enum(): array
     {
-        $this->assertSame("active", LinkStatus::ACTIVE->value);
+        return [
+            "active" => [LinkStatus::ACTIVE, "active"],
+            "expired" => [LinkStatus::EXPIRED, "expired"],
+            "disabled" => [LinkStatus::DISABLED, "disabled"],
+        ];
     }
 
-    public function test_expired_tem_valor_expired(): void
+    #[DataProvider("status_e_valor_enum")]
+    public function test_caso_tem_valor_correto(LinkStatus $status, string $valor): void
     {
-        $this->assertSame("expired", LinkStatus::EXPIRED->value);
-    }
-
-    public function test_disabled_tem_valor_disabled(): void
-    {
-        $this->assertSame("disabled", LinkStatus::DISABLED->value);
+        $this->assertSame($valor, $status->value);
     }
 
     public function test_from_string_valida(): void
