@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use Hyperf\Database\Model\Concerns\HasUuids;
 use Hyperf\DbConnection\Model\Model;
 
 /**
@@ -18,6 +19,8 @@ use Hyperf\DbConnection\Model\Model;
  */
 class Link extends Model
 {
+    use HasUuids;
+
     /**
      * The table associated with the model.
      */
@@ -26,7 +29,14 @@ class Link extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected array $fillable = [];
+    protected array $fillable = [
+        "id",
+        "slug",
+        "original_url",
+        "status",
+        "expires_at",
+        "owner_user_id"
+    ];
 
     /**
      * The attributes that should be cast to native types.
