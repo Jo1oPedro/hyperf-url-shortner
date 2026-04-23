@@ -1,0 +1,4 @@
+services:
+  mysql:
+    volumes:
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
