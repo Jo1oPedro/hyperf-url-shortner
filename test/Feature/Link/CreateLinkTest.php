@@ -33,6 +33,41 @@ class CreateLinkTest extends HttpTestCase
         $response->assertJson(["slug" => "meuslug"]);
     }
 
+    public function test_cria_link_com_expires_at(): void
+    {
+        $expiresAt = date('Y-m-d\TH:i:s\Z', strtotime('+1 day'));
+
+        $response = $this->json("/urls", [
+            "url" => "https://example.com",
+            "expires_at" => $expiresAt,
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJson(["original_url" => "https://example.com"]);
+    }
+
+    public function test_retorna_422_quando_expires_at_invalido(): void
+    {
+        $response = $this->json("/urls", [
+            "url" => "https://example.com",
+            "expires_at" => "26/06/2001",
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_retorna_422_quando_expires_at_no_passado(): void
+    {
+        $expiresAt = date('Y-m-d\TH:i:s\Z', strtotime('-1 day'));
+
+        $response = $this->json("/urls", [
+            "url" => "https://example.com",
+            "expires_at" => $expiresAt,
+        ]);
+
+        $response->assertStatus(422);
+    }
+
     public function test_retorna_422_quando_url_invalida(): void
     {
         $response = $this->json("/urls", ["url" => "nao-e-uma-url"]);
