@@ -11,11 +11,13 @@ declare(strict_types=1);
  */
 
 use App\Exception\Handler\SlugAlreadyExistsHandler;
+use Hyperf\Validation\ValidationExceptionHandler;
 
 return [
     'handler' => [
         'http' => [
             Hyperf\HttpServer\Exception\Handler\HttpExceptionHandler::class,
+            ValidationExceptionHandler::class,
             SlugAlreadyExistsHandler::class,
             App\Exception\Handler\AppExceptionHandler::class,
         ],
