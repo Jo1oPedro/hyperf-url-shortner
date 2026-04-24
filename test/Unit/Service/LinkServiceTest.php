@@ -5,6 +5,7 @@ namespace HyperfTest\Unit\Service;
 use App\Domain\Link\LinkRepository;
 use App\Domain\Link\Slug;
 use App\Domain\Link\SlugGenerator;
+use App\DTO\CreateLinkDTO;
 use App\Exception\SlugAlreadyExistsException;
 use App\Service\LinkService;
 use PHPUnit\Framework\TestCase;
@@ -35,7 +36,7 @@ class LinkServiceTest extends TestCase
             ->expects($this->once())
             ->method('save');
 
-        $link = $this->linkService->create("https://example.com");
+        $link = $this->linkService->create(new CreateLinkDTO(url: "https://example.com"));
 
         $this->assertSame("geradoslug", (string) $link->slug);
         $this->assertEquals("https://example.com", $link->original_url);
@@ -52,7 +53,10 @@ class LinkServiceTest extends TestCase
             ->expects($this->once())
             ->method("save");
 
-        $link = $this->linkService->create("https://example.com", "meulink");
+        $link = $this->linkService->create(new CreateLinkDTO(
+            url: "https://example.com",
+            slug:"meulink"
+        ));
 
         $this->assertSame("meulink", (string) $link->slug);
     }
@@ -61,7 +65,7 @@ class LinkServiceTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        $this->linkService->create("nao-e-uma-url");
+        $this->linkService->create(new CreateLinkDTO(url: "nao-e-uma-url"));
     }
 
     public function test_lanca_excecao_quando_slug_customizado_ja_existe(): void
@@ -73,6 +77,8 @@ class LinkServiceTest extends TestCase
 
         $this->expectException(SlugAlreadyExistsException::class);
 
-        $this->linkService->create("https://example.com", "duplicado");
+        $this->linkService->create(new CreateLinkDTO(
+            url: "https://example.com", slug:"duplicado"
+        ));
     }
 }

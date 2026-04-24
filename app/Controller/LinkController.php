@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\CreateLinkDTO;
 use App\Request\CreateLinkRequest;
 use App\Service\LinkService;
 use Hyperf\HttpMessage\Stream\SwooleStream;
@@ -24,10 +25,11 @@ class LinkController
 
     public function create(CreateLinkRequest $request, ResponseInterface $response)
     {
-        $link = $this->linkService->create(
-            $request->input("url"),
-            $request->input("slug")
-        );
+        $link = $this->linkService->create(new CreateLinkDTO(
+            url: $request->input("url"),
+            slug: $request->input("slug"),
+            expiresAt: $request->input("expires_at"),
+        ));
 
         $shortUrl = rtrim(env("APP_URL", "http://localhost:9501"), "/") . "/" . $link->slug;
 
