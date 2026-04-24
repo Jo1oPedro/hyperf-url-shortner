@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Request\CreateLinkRequest;
 use App\Service\LinkService;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\RequestInterface;
@@ -21,19 +22,12 @@ class LinkController
         return $response->raw('Hello Hyperf!');
     }
 
-    public function create(RequestInterface $request, ResponseInterface $response)
+    public function create(CreateLinkRequest $request, ResponseInterface $response)
     {
-        $url = $request->input("url", "");
-        $customSlug = $request->input("slug");
-
-        try {
-            $link = $this->linkService->create($url, $customSlug);
-        } catch (\InvalidArgumentException $exception) {
-            return $response
-                ->withStatus(400)
-                ->withHeader("Content-Type", "application/json")
-                ->withBody(new SwooleStream(json_encode(["error" => $exception->getMessage()])));
-        }
+        $link = $this->linkService->create(
+            $request->input("url"),
+            $request->input("slug")
+        );
 
         $shortUrl = rtrim(env("APP_URL", "http://localhost:9501"), "/") . "/" . $link->slug;
 
