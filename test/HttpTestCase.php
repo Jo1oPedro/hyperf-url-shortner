@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace HyperfTest;
 
 use Hyperf\Testing\Client;
+use Hyperf\Testing\Concerns\MakesHttpRequests;
 use PHPUnit\Framework\TestCase;
 
 use function Hyperf\Support\make;
@@ -27,6 +28,8 @@ use function Hyperf\Support\make;
  */
 abstract class HttpTestCase extends TestCase
 {
+    use MakesHttpRequests;
+
     /**
      * @var Client
      */
