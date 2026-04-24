@@ -9,10 +9,14 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
+use App\Exception\Handler\SlugAlreadyExistsHandler;
+
 return [
     'handler' => [
         'http' => [
             Hyperf\HttpServer\Exception\Handler\HttpExceptionHandler::class,
+            SlugAlreadyExistsHandler::class,
             App\Exception\Handler\AppExceptionHandler::class,
         ],
     ],
