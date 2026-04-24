@@ -33,11 +33,11 @@ class CreateLinkTest extends HttpTestCase
         $response->assertJson(["slug" => "meuslug"]);
     }
 
-    public function test_retorna_400_quando_url_invalida(): void
+    public function test_retorna_422_quando_url_invalida(): void
     {
         $response = $this->json("/urls", ["url" => "nao-e-uma-url"]);
 
-        $response->assertStatus(400);
+        $response->assertStatus(422);
     }
 
     public function test_retorna_400_quando_slug_customizado_ja_existe(): void
