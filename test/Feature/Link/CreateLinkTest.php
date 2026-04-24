@@ -30,7 +30,7 @@ class CreateLinkTest extends HttpTestCase
         ]);
 
         $response->assertStatus(201);
-        $response->assertJson(["slug", "meuslug"]);
+        $response->assertJson(["slug" => "meuslug"]);
     }
 
     public function test_retorna_400_quando_url_invalida(): void
