@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use App\Domain\Link\LinkStatus;
 use Hyperf\Database\Model\Concerns\HasUuids;
 use Hyperf\DbConnection\Model\Model;
 
@@ -42,4 +43,8 @@ class Link extends Model
      * The attributes that should be cast to native types.
      */
     protected array $casts = ['created_at' => 'datetime', 'updated_at' => 'datetime'];
+
+    protected array $attributes = [
+        'status' => LinkStatus::ACTIVE->value,
+    ];
 }
