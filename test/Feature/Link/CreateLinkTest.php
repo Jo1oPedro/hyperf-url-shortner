@@ -35,7 +35,7 @@ class CreateLinkTest extends HttpTestCase
 
     public function test_cria_link_com_expires_at(): void
     {
-        $expiresAt = date('Y-m-d\TH:i:s\Z', strtotime('+1 day'));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 day'));
 
         $response = $this->json("/urls", [
             "url" => "https://example.com",
@@ -58,7 +58,7 @@ class CreateLinkTest extends HttpTestCase
 
     public function test_retorna_422_quando_expires_at_no_passado(): void
     {
-        $expiresAt = date('Y-m-d\TH:i:s\Z', strtotime('-1 day'));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('-1 day'));
 
         $response = $this->json("/urls", [
             "url" => "https://example.com",
