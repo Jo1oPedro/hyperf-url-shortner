@@ -24,7 +24,7 @@ class CreateLinkRequest extends FormRequest
         return [
             "url" => "required|url",
             "slug" => "nullable|alpha_dash|min:4|max:16",
-            "expires_at" => "nullable|date_format:Y-m-d\TH:i:s\Z|after:now",
+            "expires_at" => "nullable|date_format:Y-m-d H:i:s|after:now",
         ];
     }
 }
