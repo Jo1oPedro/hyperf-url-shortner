@@ -6,6 +6,7 @@ use App\Domain\Link\LinkRepository;
 use App\Domain\Link\Slug;
 use App\Domain\Link\SlugGenerator;
 use App\DTO\CreateLinkDTO;
+use App\DTO\LinkDTO;
 use App\Exception\SlugAlreadyExistsException;
 use App\Model\Link;
 
@@ -16,7 +17,7 @@ class LinkService
         private readonly SlugGenerator $randomSlugGenerator,
     ) {}
 
-    public function create(CreateLinkDTO $createLinkDTO): Link
+    public function create(CreateLinkDTO $createLinkDTO): LinkDTO
     {
         if(!filter_var($createLinkDTO->url, FILTER_VALIDATE_URL)) {
             throw new \InvalidArgumentException("Invalid URL: {$createLinkDTO->url}");
@@ -35,8 +36,8 @@ class LinkService
         $link->slug = (string) $slug;
         $link->expires_at = $createLinkDTO->expiresAt;
 
-        $this->linkRepository->save($link);
+        $link = $this->linkRepository->save($link);
 
-        return $link;
+        return LinkDTO::fromModel($link);
     }
 }
