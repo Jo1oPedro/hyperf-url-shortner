@@ -6,7 +6,9 @@ use App\Domain\Link\LinkRepository;
 use App\Domain\Link\Slug;
 use App\Domain\Link\SlugGenerator;
 use App\DTO\CreateLinkDTO;
+use App\DTO\LinkDTO;
 use App\Exception\SlugAlreadyExistsException;
+use App\Model\Link;
 use App\Service\LinkService;
 use PHPUnit\Framework\TestCase;
 
@@ -25,6 +27,15 @@ class LinkServiceTest extends TestCase
         $this->linkService = new LinkService($this->linkRepository, $this->slugGenerator);
     }
 
+    private function makeLinkModel(string $slug, string $url): Link
+    {
+        $link = new Link();
+        $link->slug = $slug;
+        $link->original_url = $url;
+
+        return $link;
+    }
+
     public function test_cria_link_com_slug_gerado(): void
     {
         $this->slugGenerator
@@ -34,12 +45,14 @@ class LinkServiceTest extends TestCase
 
         $this->linkRepository
             ->expects($this->once())
-            ->method('save');
+            ->method('save')
+            ->willReturn($this->makeLinkModel('geradoslug', 'https://example.com'));
 
-        $link = $this->linkService->create(new CreateLinkDTO(url: "https://example.com"));
+        $linkDto = $this->linkService->create(new CreateLinkDTO(url: "https://example.com"));
 
-        $this->assertSame("geradoslug", (string) $link->slug);
-        $this->assertEquals("https://example.com", $link->original_url);
+        $this->assertInstanceOf(LinkDTO::class, $linkDto);
+        $this->assertSame("geradoslug", (string) $linkDto->slug);
+        $this->assertEquals("https://example.com", $linkDto->originalUrl);
     }
 
     public function test_cria_link_com_slug_customizado(): void
@@ -51,14 +64,16 @@ class LinkServiceTest extends TestCase
 
         $this->linkRepository
             ->expects($this->once())
-            ->method("save");
+            ->method("save")
+            ->willReturn($this->makeLinkModel('meulink', 'https://example.com'));
 
-        $link = $this->linkService->create(new CreateLinkDTO(
+        $linkDto = $this->linkService->create(new CreateLinkDTO(
             url: "https://example.com",
             slug:"meulink"
         ));
 
-        $this->assertSame("meulink", (string) $link->slug);
+        $this->assertInstanceOf(LinkDTO::class, $linkDto);
+        $this->assertSame("meulink", (string) $linkDto->slug);
     }
 
     public function test_lanca_excecao_quando_url_invalida(): void
