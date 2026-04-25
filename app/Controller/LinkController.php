@@ -31,15 +31,12 @@ class LinkController
             expiresAt: $request->input("expires_at"),
         ));
 
-        $shortUrl = rtrim(env("APP_URL", "http://localhost:9501"), "/") . "/" . $link->slug;
+        $data = $link->toArray();
+        $data["short_url"] = rtrim(env("APP_URL", "http://localhost:9501"), "/") . "/" . $link->slug;
 
         return $response
             ->withStatus(201)
             ->withHeader("Content-Type", "application/json")
-            ->withBody(new SwooleStream(json_encode([
-                "slug" => $link->slug,
-                "short_url" => $shortUrl,
-                "original_url" => $link->original_url,
-            ])));
+            ->withBody(new SwooleStream(json_encode($data)));
     }
 }
