@@ -2,7 +2,7 @@
 
 ## Para o Claude Code: contexto deste projeto
 
-Você está ajudando João Pedro a **estudar para uma vaga de PHP Pleno no PicPay**. Este é o primeiro projeto da série: um encurtador de URLs em Hyperf 3.x. O objetivo pedagógico é **aquecer com Hyperf sem complexidade de domínio** — a regra de negócio é trivial, o foco é o framework e as ferramentas.
+Este é o primeiro projeto da série: um encurtador de URLs em Hyperf 3.x. O objetivo pedagógico é **aquecer com Hyperf sem complexidade de domínio** — a regra de negócio é trivial, o foco é o framework e as ferramentas.
 
 ## Tópicos da vaga exercitados
 
@@ -106,7 +106,7 @@ Execute na ordem:
 ## Como você (Claude Code) deve se portar
 
 - **Nunca pule a fase de teste.** Se a TASK exige TDD, você escreve o teste ANTES da implementação e mostra o ciclo red → green → refactor.
-- **Explique decisões arquiteturais curtas no commit** — o próprio João aprende lendo isso depois.
+- **Explique decisões arquiteturais curtas no commit**.
 - **Se perceber que uma TASK não faz sentido ou está mal definida**, avise antes de implementar.
 - **Use linguagem técnica direta**, sem floreio.
 - **Não invente dependências** — se precisa de lib nova, justifique.
