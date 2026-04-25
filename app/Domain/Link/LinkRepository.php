@@ -8,6 +8,6 @@ interface LinkRepository
 {
     public function findBySlug(Slug $slug): ?Link;
 
-    public function save(Link $link): void;
+    public function save(Link $link): Link;
     public function existsBySlug(Slug $slug): bool;
 }
