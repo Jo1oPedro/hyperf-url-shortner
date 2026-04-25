@@ -9,6 +9,7 @@ use App\DTO\CreateLinkDTO;
 use App\DTO\LinkDTO;
 use App\Exception\SlugAlreadyExistsException;
 use App\Model\Link;
+use App\Service\LinkCache;
 use App\Service\LinkService;
 use PHPUnit\Framework\TestCase;
 
@@ -17,6 +18,7 @@ class LinkServiceTest extends TestCase
     private LinkRepository $linkRepository;
     private SlugGenerator $slugGenerator;
     private LinkService $linkService;
+    private LinkCache $linkCache;
 
     protected function setUp(): void
     {
@@ -24,7 +26,8 @@ class LinkServiceTest extends TestCase
 
         $this->linkRepository = $this->createMock(LinkRepository::class);
         $this->slugGenerator = $this->createMock(SlugGenerator::class);
-        $this->linkService = new LinkService($this->linkRepository, $this->slugGenerator);
+        $this->linkCache = $this->createMock(LinkCache::class);
+        $this->linkService = new LinkService($this->linkRepository, $this->slugGenerator, $this->linkCache);
     }
 
     private function makeLinkModel(string $slug, string $url): Link
