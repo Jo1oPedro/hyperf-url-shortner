@@ -39,4 +39,13 @@ class LinkController
             ->withHeader("Content-Type", "application/json")
             ->withBody(new SwooleStream(json_encode($data)));
     }
+
+    public function redirect(RequestInterface $request, ResponseInterface $response, string $slug)
+    {
+        $link = $this->linkService->resolve($slug);
+
+        return $response
+            ->withStatus(302)
+            ->withHeader("Location", $link->originalUrl);
+    }
 }
