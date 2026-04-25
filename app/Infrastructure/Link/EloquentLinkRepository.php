@@ -13,9 +13,10 @@ class EloquentLinkRepository implements LinkRepository
         return Link::whereSlug((string) $slug)->first();
     }
 
-    public function save(Link $link): void
+    public function save(Link $link): Link
     {
         $link->save();
+        return $link->fresh();
     }
 
     public function existsBySlug(Slug $slug): bool
