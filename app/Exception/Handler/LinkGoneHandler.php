@@ -2,7 +2,7 @@
 
 namespace App\Exception\Handler;
 
-use App\Exception\LinkNotFoundException;
+use App\Exception\LinkGoneException;
 use Hyperf\ExceptionHandler\ExceptionHandler;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Psr\Http\Message\ResponseInterface;
@@ -24,6 +24,6 @@ class LinkGoneHandler extends ExceptionHandler
 
     public function isValid(Throwable $throwable): bool
     {
-        return $throwable instanceof LinkNotFoundException;
+        return $throwable instanceof LinkGoneException;
     }
 }
