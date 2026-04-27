@@ -11,6 +11,7 @@ use App\Exception\SlugAlreadyExistsException;
 use App\Model\Link;
 use App\Service\LinkCache;
 use App\Service\LinkService;
+use App\Service\QueueService;
 use PHPUnit\Framework\TestCase;
 
 class LinkServiceTest extends TestCase
@@ -19,6 +20,7 @@ class LinkServiceTest extends TestCase
     private SlugGenerator $slugGenerator;
     private LinkService $linkService;
     private LinkCache $linkCache;
+    private QueueService $queueService;
 
     protected function setUp(): void
     {
@@ -27,7 +29,8 @@ class LinkServiceTest extends TestCase
         $this->linkRepository = $this->createMock(LinkRepository::class);
         $this->slugGenerator = $this->createMock(SlugGenerator::class);
         $this->linkCache = $this->createMock(LinkCache::class);
-        $this->linkService = new LinkService($this->linkRepository, $this->slugGenerator, $this->linkCache);
+        $this->queueService = $this->createMock(QueueService::class);
+        $this->linkService = new LinkService($this->linkRepository, $this->slugGenerator, $this->linkCache, $this->queueService);
     }
 
     private function makeLinkModel(string $slug, string $url): Link

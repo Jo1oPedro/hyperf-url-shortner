@@ -10,6 +10,7 @@ use App\Infrastructure\Link\EloquentLinkRepository;
 use App\Model\Link;
 use App\Service\LinkCache;
 use App\Service\LinkService;
+use App\Service\QueueService;
 use Hyperf\Context\ApplicationContext;
 use HyperfTest\HttpTestCase;
 use function Hyperf\Tappable\tap;
@@ -87,6 +88,7 @@ class RedirectTest extends HttpTestCase
             $mockRepo,
             $container->get(SlugGenerator::class),
             $linkCache,
+            $container->get(QueueService::class)
         );
 
         $container->set(LinkRepository::class, $mockRepo);
@@ -103,6 +105,7 @@ class RedirectTest extends HttpTestCase
                 $realRepo,
                 $container->get(SlugGenerator::class),
                 $linkCache,
+                $container->get(QueueService::class)
             );
             $container->set(LinkRepository::class, $realRepo);
             $container->set(LinkService::class, $realService);
