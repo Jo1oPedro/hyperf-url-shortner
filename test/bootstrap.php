@@ -49,9 +49,3 @@ if (($container->get(ConfigInterface::class)->get('app_env')) === 'testing') {
 
     $migrator->run([BASE_PATH . '/migrations']);
 }
-
-var_dump([
-    'app_env' => $container->get(ConfigInterface::class)->get('app_env'),
-    'db' => $container->get(ConfigInterface::class)->get('databases.default.database'),
-    'getenv_db' => getenv('DB_DATABASE'),
-]);
