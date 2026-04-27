@@ -11,6 +11,7 @@ use App\DTO\LinkDTO;
 use App\Exception\LinkGoneException;
 use App\Exception\LinkNotFoundException;
 use App\Exception\SlugAlreadyExistsException;
+use App\Job\IncrementClicksJob;
 use App\Model\Link;
 
 class LinkService
@@ -19,6 +20,7 @@ class LinkService
         private readonly LinkRepository $linkRepository,
         private readonly SlugGenerator $randomSlugGenerator,
         private readonly LinkCache $linkCache,
+        private readonly QueueService $queueService,
     ) {}
 
     public function create(CreateLinkDTO $createLinkDTO): LinkDTO
@@ -85,6 +87,8 @@ class LinkService
         if($cached["expires_at"] !== null && strtotime($cached["expires_at"]) < time()) {
             throw new LinkGoneException("Link '{$slug}' expired");
         }
+
+        $this->queueService->push(new IncrementClicksJob($slug));
 
         return new LinkDTO(
             slug: $slug,
