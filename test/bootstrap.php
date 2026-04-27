@@ -25,6 +25,13 @@ date_default_timezone_set('Asia/Shanghai');
 
 require BASE_PATH . '/vendor/autoload.php';
 
+putenv('APP_ENV=testing');
+putenv('DB_DATABASE=hyperf_url_shortner_test');
+$_ENV['APP_ENV'] = 'testing';
+$_ENV['DB_DATABASE'] = 'hyperf_url_shortner_test';
+$_SERVER['APP_ENV'] = 'testing';
+$_SERVER['DB_DATABASE'] = 'hyperf_url_shortner_test';
+
 ! defined('SWOOLE_HOOK_FLAGS') && define('SWOOLE_HOOK_FLAGS', DefaultOption::hookFlags());
 
 ClassLoader::init();
@@ -42,3 +49,9 @@ if (($container->get(ConfigInterface::class)->get('app_env')) === 'testing') {
 
     $migrator->run([BASE_PATH . '/migrations']);
 }
+
+var_dump([
+    'app_env' => $container->get(ConfigInterface::class)->get('app_env'),
+    'db' => $container->get(ConfigInterface::class)->get('databases.default.database'),
+    'getenv_db' => getenv('DB_DATABASE'),
+]);
