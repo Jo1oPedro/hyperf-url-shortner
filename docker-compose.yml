@@ -1,6 +1,6 @@
 services:
   app:
-    container_name: hyperf-boleto
+    container_name: hyperf-url-shortner
     build:
       dockerfile: dev.Dockerfile
       args:
@@ -14,7 +14,7 @@ services:
       APP_ENV: dev
       SCAN_CACHEABLE: "false"
       DB_HOST: mysql
-      DB_DATABASE: ${DB_DATABASE:-hyperf_boleto}
+      DB_DATABASE: ${DB_DATABASE:-hyperf_url_shortner}
       DB_USERNAME: ${DB_USERNAME:-hyperf}
       DB_PASSWORD: ${DB_PASSWORD:-secret}
       REDIS_HOST: redis
