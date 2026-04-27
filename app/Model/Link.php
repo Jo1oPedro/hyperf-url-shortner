@@ -14,9 +14,10 @@ use Hyperf\DbConnection\Model\Model;
  * @property string $original_url 
  * @property string $status 
  * @property string $expires_at 
- * @property string $owner_user_id 
- * @property \Carbon\Carbon $created_at 
- * @property \Carbon\Carbon $updated_at 
+ * @property int $clicks
+ * @property string $owner_user_id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
  */
 class Link extends Model
 {
@@ -33,6 +34,7 @@ class Link extends Model
     protected array $fillable = [
         "id",
         "slug",
+        "clicks",
         "original_url",
         "status",
         "expires_at",
