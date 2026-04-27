@@ -41,6 +41,7 @@ class LinkService
         $link->expires_at = $createLinkDTO->expiresAt;
 
         $link = $this->linkRepository->save($link);
+        $this->linkCache->invalidate($link->slug);
 
         return LinkDTO::fromModel($link);
     }
@@ -49,12 +50,17 @@ class LinkService
     {
         $slugVO = new Slug($slug);
 
+        if($this->linkCache->isKnownMissing($slug)) {
+            throw new LinkNotFoundException("Link '{$slug}' not found");
+        }
+
         $cached = $this->linkCache->get($slug);
 
         if($cached === null) {
             $link = $this->linkRepository->findBySlug($slugVO);
 
             if($link === null) {
+                $this->linkCache->markMissing($slug);
                 throw new LinkNotFoundException("Link '{$slug}' not found");
             }
 
@@ -64,7 +70,12 @@ class LinkService
                 "expires_at" => $link->expires_at,
             ];
 
-            $this->linkCache->set($slug, $cached);
+            if(
+                $cached["status"] === LinkStatus::ACTIVE->value
+                && ($cached["expires_at"] === null || strtotime($cached["expires_at"]) > time())
+            ) {
+                $this->linkCache->set($slug, $cached);
+            }
         }
 
         if($cached["status"] !== LinkStatus::ACTIVE->value) {
