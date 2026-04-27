@@ -32,6 +32,7 @@ Este é o primeiro projeto da série: um encurtador de URLs em Hyperf 3.x. O obj
 - PSR-12 para formatação.
 - Nomes em **português** para domínio de negócio (`Link`, `Slug`, `EstatisticaAcesso`) — opcional, mas no Brasil é comum e legítimo. Se preferir inglês, mantenha consistência.
 - Testes nomeados em português no estilo BDD: `test_redireciona_para_url_original_quando_slug_existe`.
+- SIGA A DOCUMENTAÇÃO DO HYPERF A RISCA
 
 ## Convenções de commit
 
