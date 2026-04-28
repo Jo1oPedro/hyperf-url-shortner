@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\DTO\CreateLinkDTO;
 use App\Request\CreateLinkRequest;
+use App\Resource\LinkStatsResource;
 use App\Service\LinkService;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\RequestInterface;
@@ -47,5 +48,13 @@ class LinkController
         return $response
             ->withStatus(302)
             ->withHeader("Location", $link->originalUrl);
+    }
+
+    public function stats(RequestInterface $request, ResponseInterface $response, string $slug)
+    {
+        $link = $this->linkService->linkStats($slug);
+        $resource = new LinkStatsResource($link);
+
+        return $response->json($resource->toArray());
     }
 }

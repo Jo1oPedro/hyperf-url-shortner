@@ -19,5 +19,6 @@ Router::get('/favicon.ico', function () {
 });
 
 Router::addRoute(['POST'], '/urls', 'App\Controller\LinkController@create');
+Router::addRoute(['GET'], '/urls/{slug}/stats', 'App\Controller\LinkController@stats');
 
 Router::addRoute(['GET'], '/{slug}', 'App\Controller\LinkController@redirect');

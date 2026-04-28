@@ -13,6 +13,7 @@ use App\Exception\LinkNotFoundException;
 use App\Exception\SlugAlreadyExistsException;
 use App\Job\IncrementClicksJob;
 use App\Model\Link;
+use Carbon\Carbon;
 
 class LinkService
 {
@@ -94,7 +95,18 @@ class LinkService
             slug: $slug,
             originalUrl: $cached["original_url"],
             status: $cached["status"],
-            expiresAt: $cached["expires_at"],
+            expiresAt: $cached["expires_at"] !== null ? Carbon::parse($cached["expires_at"]) : null,
         );
+    }
+
+    public function linkStats(string $slug): LinkDTO
+    {
+        $slugVO = new Slug($slug);
+        $link = $this->linkRepository->findBySlug($slugVO);
+        if($link === null) {
+            throw new LinkNotFoundException("Link '{$slug}' not found");
+        }
+
+        return LinkDTO::fromModel($link);
     }
 }
