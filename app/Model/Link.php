@@ -13,7 +13,7 @@ use Hyperf\DbConnection\Model\Model;
  * @property string $slug 
  * @property string $original_url 
  * @property string $status 
- * @property string $expires_at 
+ * @property \Carbon\Carbon|null $expires_at
  * @property int $clicks
  * @property string $owner_user_id
  * @property \Carbon\Carbon $created_at
@@ -44,7 +44,7 @@ class Link extends Model
     /**
      * The attributes that should be cast to native types.
      */
-    protected array $casts = ['created_at' => 'datetime', 'updated_at' => 'datetime'];
+    protected array $casts = ['created_at' => 'datetime', 'updated_at' => 'datetime', 'expires_at' => 'datetime'];
 
     protected array $attributes = [
         'status' => LinkStatus::ACTIVE->value,
