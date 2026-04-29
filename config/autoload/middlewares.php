@@ -10,10 +10,12 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
+use App\Middleware\RateLimitMiddleware;
 use Hyperf\Validation\Middleware\ValidationMiddleware;
 
 return [
     'http' => [
-        ValidationMiddleware::class
+        RateLimitMiddleware::class,
+        ValidationMiddleware::class,
     ],
 ];
