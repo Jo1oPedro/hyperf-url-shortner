@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Domain\Auth\Claims;
 use App\DTO\CreateLinkDTO;
 use App\Request\CreateLinkRequest;
 use App\Resource\LinkStatsResource;
 use App\Service\LinkService;
+use Hyperf\Context\Context;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
@@ -30,6 +32,7 @@ class LinkController
             url: $request->input("url"),
             slug: $request->input("slug"),
             expiresAt: $request->input("expires_at"),
+            ownerUserId: Context::get(Claims::CONTEXT_USER_ID)
         ));
 
         $data = $link->toArray();

@@ -18,7 +18,7 @@ Router::get('/favicon.ico', function () {
     return '';
 });
 
-Router::addRoute(['POST'], '/urls', 'App\Controller\LinkController@create');
+Router::addRoute(['POST'], '/urls', 'App\Controller\LinkController@create', ["middleware" => [\App\Middleware\JwtMiddleware::class]]);
 Router::addRoute(['GET'], '/urls/{slug}/stats', 'App\Controller\LinkController@stats');
 
 Router::addRoute(['GET'], '/{slug}', 'App\Controller\LinkController@redirect');

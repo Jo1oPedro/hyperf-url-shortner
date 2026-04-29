@@ -42,6 +42,7 @@ class LinkService
         $link->original_url = $createLinkDTO->url;
         $link->slug = (string) $slug;
         $link->expires_at = $createLinkDTO->expiresAt;
+        $link->owner_user_id = $createLinkDTO->ownerUserId;
 
         $link = $this->linkRepository->save($link);
         $this->linkCache->invalidate($link->slug);
