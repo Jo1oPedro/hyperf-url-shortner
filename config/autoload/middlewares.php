@@ -10,11 +10,17 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
+use App\Middleware\HttpMetricsMiddleware;
 use App\Middleware\RateLimitMiddleware;
+use App\Middleware\RequestIdMiddleware;
+use App\Middleware\RequestLogMiddleware;
 use Hyperf\Validation\Middleware\ValidationMiddleware;
 
 return [
     'http' => [
+        RequestIdMiddleware::class,
+        RequestLogMiddleware::class,
+        HttpMetricsMiddleware::class,
         RateLimitMiddleware::class,
         ValidationMiddleware::class,
     ],
