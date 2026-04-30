@@ -23,7 +23,7 @@ class RequestIdMiddleware implements MiddlewareInterface
     {
         $requestId = $request->getHeaderLine("X-Request-Id");
 
-        if($requestId !== "") {
+        if($requestId === "") {
             $requestId = Uuid::uuid4()->toString();
         }
 
