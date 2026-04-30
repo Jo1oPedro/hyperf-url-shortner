@@ -6,11 +6,13 @@ namespace App\Middleware;
 
 use App\Domain\Auth\Claims;
 use App\Observability\Metrics;
+use App\Observability\Tracer;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Hyperf\Context\Context;
 use Hyperf\Contract\ConfigInterface;
+use OpenTelemetry\API\Trace\SpanInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,6 +25,7 @@ class JwtMiddleware implements MiddlewareInterface
         private readonly ConfigInterface $config,
         private readonly HttpResponse $httpResponse,
         private readonly Metrics $metrics,
+        private readonly Tracer $tracer,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -35,12 +38,21 @@ class JwtMiddleware implements MiddlewareInterface
         }
 
         try {
-            $this->rejectAlgNone($token);
+            $claims = $this->tracer->trace(
+                "jwt.validate",
+                function (SpanInterface $span) use ($token) {
+                    $this->rejectAlgNone($token);
 
-            $algorithm = (string) $this->config->get("jwt.algorithm", "HS256");
-            $payload = JWT::decode($token, new Key($this->verificationKey(), $algorithm));
+                    $algorithm = (string) $this->config->get("jwt.algorithm", "HS256");
 
-            $claims = $this->claimsFromPayload($payload);
+                    $span->setAttribute("jwt.algorithm", $algorithm);
+
+                    $payload = JWT::decode($token, new Key($this->verificationKey(), $algorithm));
+
+                    return $this->claimsFromPayload($payload);
+                }
+            );
+
             Context::set(Claims::CONTEXT_USER_ID, $claims->userId);
         } catch (ExpiredException) {
             $this->metrics->jwtRejected('token_expired');

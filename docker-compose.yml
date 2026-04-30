@@ -19,6 +19,15 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-secret}
       REDIS_HOST: redis
       KAFKA_BROKERS: kafka:9092
+      OTEL_PHP_AUTOLOAD_ENABLED: "true"
+      OTEL_SERVICE_NAME: hyperf-url-shortener
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://otel-collector:4318/v1/traces
+      OTEL_EXPORTER_OTLP_TRACES_PROTOCOL: http/protobuf
+      OTEL_PHP_TRACES_PROCESSOR: simple
+      OTEL_LOG_LEVEL: debug
     depends_on:
       mysql:
         condition: service_healthy
@@ -128,6 +137,30 @@ services:
       - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
       - prometheus
+    networks:
+      - hyperf-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: hyperf-otel-collector
+    command: [ "--config=/etc/otelcol/config.yml" ]
+    volumes:
+      - ./docker/otel/collector.yml:/etc/otelcol/config.yml:ro
+    ports:
+      - "4318:4318"
+      - "4317:4317"
+    depends_on:
+      - jaeger
+    networks:
+      - hyperf-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: hyperf-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
     networks:
       - hyperf-network
 

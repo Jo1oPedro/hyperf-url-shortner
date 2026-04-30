@@ -31,6 +31,9 @@
         "hyperf/redis": "^3.1",
         "hyperf/validation": "^3.1",
         "longlang/phpkafka": "^1.2",
+        "open-telemetry/context-swoole": "^1.2",
+        "open-telemetry/opentelemetry": "^1.1",
+        "php-http/httplug": "^2.4",
         "promphp/prometheus_client_php": "^2.15",
         "ramsey/uuid": "^4.9"
     },
@@ -64,7 +67,11 @@
     "prefer-stable": true,
     "config": {
         "optimize-autoloader": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "tbachert/spi": true
+        }
     },
     "extra": [],
     "scripts": {

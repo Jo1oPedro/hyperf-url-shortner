@@ -2,7 +2,9 @@
 
 namespace App\Service;
 
+use App\Observability\Tracer;
 use Hyperf\Redis\Redis;
+use OpenTelemetry\API\Trace\SpanInterface;
 use function Hyperf\Support\env;
 
 class LinkCache
@@ -12,21 +14,46 @@ class LinkCache
     private const NEGATIVE_TTL = 30;
     private int $ttl;
 
-    public function __construct(private readonly Redis $redis)
+    public function __construct(
+        private readonly Redis $redis,
+        private readonly Tracer $tracer,
+    )
     {
         $this->ttl = (int) env('LINK_CACHE_TTL', 600);
     }
 
     public function get(string $slug): ?array
     {
-        $data = $this->redis->get(self::PREFIX . $slug);
+        return $this->tracer->trace(
+            "redis.link_cache.get",
+            function (SpanInterface $span) use ($slug) {
+                $data = $this->redis->get(self::PREFIX . $slug);
 
-        return $data ? json_decode($data, true) : null;
+                $span->setAttribute('cache.hit', $data !== false && $data !== null);
+
+                return $data ? json_decode($data, true) : null;
+            },
+            [
+                "db.system" => "redis",
+                "redis.operation" => "GET",
+                "redis.key_pattern" => "link:{slug}"
+            ]
+        );
     }
 
     public function set(string $slug, array $data): void
     {
-        $this->redis->setex(self::PREFIX . $slug, $this->ttl, json_encode($data));
+        $this->tracer->trace(
+            "redis.link_cache.set",
+            function () use ($slug, $data) {
+                $this->redis->setex(self::PREFIX . $slug, $this->ttl, json_encode($data));
+            },
+            [
+                "db.system" => "redis",
+                "redis.operation" => "SETEX",
+                "redis.key_pattern" => "link:{slug}"
+            ]
+        );
     }
 
     public function invalidate(string $slug): void

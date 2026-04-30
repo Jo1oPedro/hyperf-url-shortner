@@ -14,11 +14,13 @@ use App\Middleware\HttpMetricsMiddleware;
 use App\Middleware\RateLimitMiddleware;
 use App\Middleware\RequestIdMiddleware;
 use App\Middleware\RequestLogMiddleware;
+use App\Middleware\TracingMiddleware;
 use Hyperf\Validation\Middleware\ValidationMiddleware;
 
 return [
     'http' => [
         RequestIdMiddleware::class,
+        TracingMiddleware::class,
         RequestLogMiddleware::class,
         HttpMetricsMiddleware::class,
         RateLimitMiddleware::class,

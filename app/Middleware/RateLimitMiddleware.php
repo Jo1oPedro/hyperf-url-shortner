@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Observability\Metrics;
+use App\Observability\Tracer;
 use Hyperf\Redis\Redis;
 use Hyperf\HttpServer\Contract\ResponseInterface as HttpResponse;
+use OpenTelemetry\API\Trace\SpanInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -24,6 +26,7 @@ class RateLimitMiddleware implements MiddlewareInterface
         private readonly Redis $redis,
         private readonly HttpResponse $response,
         private readonly Metrics $metrics,
+        private readonly Tracer $tracer,
     )
     {
         $this->limit = max(1, (int) env("RATE_LIMIT_MAX_REQUESTS", 100));
@@ -38,17 +41,33 @@ class RateLimitMiddleware implements MiddlewareInterface
         }
 
         $now = microtime(true);
-        $key = "rl:" . $this->clientIp($request);
-        $windowStart = $now - $this->windowSeconds;
+        [$currentCount, $remaining, $resetAt] = $this->tracer->trace(
+            "redis.rate_limit.check",
+            function(SpanInterface $span) use($request, $handler, $now) {
+                $key = "rl:" . $this->clientIp($request);
+                $windowStart = $now - $this->windowSeconds;
 
-        $this->redis->zRemRangeByScore($key, "-inf", (string) $windowStart);
-        $count = (int) $this->redis->zCard($key);
-        $this->redis->zAdd($key, $now, Uuid::uuid4()->toString());
-        $this->redis->expire($key, $this->windowSeconds);
+                $this->redis->zRemRangeByScore($key, "-inf", (string) $windowStart);
+                $count = (int) $this->redis->zCard($key);
+                $this->redis->zAdd($key, $now, Uuid::uuid4()->toString());
+                $this->redis->expire($key, $this->windowSeconds);
 
-        $currentCount = $count + 1;
-        $remaining = max(0, $this->limit - $currentCount);
-        $resetAt = (int) ceil($this->oldestTimestamp($key, $now) + $this->windowSeconds);
+                $currentCount = $count + 1;
+                $remaining = max(0, $this->limit - $currentCount);
+                $resetAt = (int) ceil($this->oldestTimestamp($key, $now) + $this->windowSeconds);
+
+                $span->setAttribute("rate_limit.limit", $this->limit);
+                $span->setAttribute("rate_limit.remaining", $remaining);
+                $span->setAttribute("rate_limit.allowed", $currentCount <= $this->limit);
+
+                return [$currentCount, $remaining, $resetAt];
+            },
+            [
+                "db.system" => "redis",
+                "redis.operation" => "zset_sliding_window",
+                "redis.key_pattern" => "rl:{ip}"
+            ]
+        );
 
         if($currentCount > $this->limit) {
             $retryAfter = max(1, $resetAt - (int) ceil($now));
