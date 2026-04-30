@@ -1,4 +1,6 @@
 services:
+  app:
+    entrypoint: ["php","/opt/www/bin/hyperf.php", "server:watch"]
   mysql:
     volumes:
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
