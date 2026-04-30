@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Domain\Auth\Claims;
+use App\Observability\Metrics;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -19,8 +20,9 @@ use Hyperf\HttpServer\Contract\ResponseInterface as HttpResponse;
 class JwtMiddleware implements MiddlewareInterface
 {
     public function __construct(
-      private readonly ConfigInterface $config,
-      private readonly HttpResponse $httpResponse,
+        private readonly ConfigInterface $config,
+        private readonly HttpResponse $httpResponse,
+        private readonly Metrics $metrics,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -28,6 +30,7 @@ class JwtMiddleware implements MiddlewareInterface
         $token = $this->bearerToken($request);
 
         if($token === null) {
+            $this->metrics->jwtRejected('missing_token');
             return $this->unauthorized("Missing bearer token.");
         }
 
@@ -40,8 +43,10 @@ class JwtMiddleware implements MiddlewareInterface
             $claims = $this->claimsFromPayload($payload);
             Context::set(Claims::CONTEXT_USER_ID, $claims->userId);
         } catch (ExpiredException) {
+            $this->metrics->jwtRejected('token_expired');
             return $this->unauthorized("Token expired.");
         } catch (\Throwable) {
+            $this->metrics->jwtRejected('invalid_token');
             return $this->unauthorized("Invalid token.");
         }
 
@@ -65,6 +70,7 @@ class JwtMiddleware implements MiddlewareInterface
         $algorithm = strtolower((string) $header["alg"] ?? "");
 
         if($algorithm === "none") {
+            $this->metrics->jwtRejected('jwt_alg_none_not_allowed');
             throw new \Exception("JWT alg none is not allowed");
         }
 
@@ -76,10 +82,12 @@ class JwtMiddleware implements MiddlewareInterface
     private function claimsFromPayload(object $payload): Claims
     {
         if(!isset($payload->exp)) {
+            $this->metrics->jwtRejected('missing_exp_claim');
             throw new \RuntimeException("Missing exp claim.");
         }
 
         if(($payload->iss ?? null) !== $this->config->get("jwt.issuer")) {
+            $this->metrics->jwtRejected('invalid_issuer');
             throw new \RuntimeException("Invalid issuer.");
         }
 
@@ -87,10 +95,12 @@ class JwtMiddleware implements MiddlewareInterface
         $expectedAudience = $this->config->get("jwt.audience");
 
         if($audience !== $expectedAudience && !(is_array($audience) && in_array($expectedAudience, $audience, true))) {
+            $this->metrics->jwtRejected('invalid_audience');
             throw new \RuntimeException("Invalid audience.");
         }
 
         if(!isset($payload->user_id) || !is_string($payload->user_id) || $payload->user_id === "") {
+            $this->metrics->jwtRejected('missing_user_id_claim');
             throw new \RuntimeException("Missing user_id claim.");
         }
 
@@ -111,6 +121,7 @@ class JwtMiddleware implements MiddlewareInterface
         $segments = explode(".", $token);
 
         if(count($segments) !== 3) {
+            $this->metrics->jwtRejected('malformed_token');
             throw new \RuntimeException("Malformed token.");
         }
 
@@ -119,6 +130,7 @@ class JwtMiddleware implements MiddlewareInterface
         $header = json_decode((string) $json, true);
 
         if(!is_array($header)) {
+            $this->metrics->jwtRejected('invalid_token_header');
             throw new \RuntimeException("Invalid token header.");
         }
 
