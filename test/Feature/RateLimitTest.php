@@ -33,7 +33,7 @@ class RateLimitTest extends HttpTestCase
         $response->assertStatus(429);
         $this->assertSame("0", $response->getHeaderLine("X-RateLimit-Remaining"));
         $this->assertNotSame("", $response->getHeaderLine("Retry-After"));
-        $this->assertNotSame("", $response->getHeaderLine("X-RateLimit-Reset-At"));
+        $this->assertNotSame("", $response->getHeaderLine("X-RateLimit-Reset"));
 
     }
 }

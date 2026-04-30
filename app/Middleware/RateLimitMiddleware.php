@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Observability\Metrics;
 use Hyperf\Redis\Redis;
 use Hyperf\HttpServer\Contract\ResponseInterface as HttpResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -21,7 +22,8 @@ class RateLimitMiddleware implements MiddlewareInterface
 
     public function __construct(
         private readonly Redis $redis,
-        private readonly HttpResponse $response
+        private readonly HttpResponse $response,
+        private readonly Metrics $metrics,
     )
     {
         $this->limit = max(1, (int) env("RATE_LIMIT_MAX_REQUESTS", 100));
@@ -31,6 +33,10 @@ class RateLimitMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        if($request->getUri()->getPath() === '/metrics') {
+            return $handler->handle($request);
+        }
+
         $now = microtime(true);
         $key = "rl:" . $this->clientIp($request);
         $windowStart = $now - $this->windowSeconds;
@@ -46,6 +52,7 @@ class RateLimitMiddleware implements MiddlewareInterface
 
         if($currentCount > $this->limit) {
             $retryAfter = max(1, $resetAt - (int) ceil($now));
+            $this->metrics->rateLimitBlocked($this->routeLabel($request));
 
             return $this->withRateLimitHeaders(
                 $this->response->json(["error" => "Rate limit exceeded."])
@@ -71,7 +78,7 @@ class RateLimitMiddleware implements MiddlewareInterface
         return $response
             ->withHeader("X-RateLimit-Limit", $this->limit)
             ->withHeader("X-RateLimit-Remaining", $remaining)
-            ->withHeader("X-RateLimit-Reset-At", $resetAt);
+            ->withHeader("X-RateLimit-Reset", $resetAt);
     }
 
     private function oldestTimestamp(string $key, float $fallback): float
@@ -123,5 +130,19 @@ class RateLimitMiddleware implements MiddlewareInterface
     private function isValidIp(string $ip): bool
     {
         return filter_var($ip, FILTER_VALIDATE_IP) !== false;
+    }
+
+    private function routeLabel(ServerRequestInterface $request): string
+    {
+        $path = $request->getUri()->getPath();
+
+        return match (true) {
+            $path === '/' => '/',
+            $path === '/metrics' => '/metrics',
+            $path === '/urls' => '/urls',
+            preg_match('#^/urls/[^/]+/stats$#', $path) === 1 => '/urls/{slug}/stats',
+            preg_match('#^/[^/]+$#', $path) === 1 => '/{slug}',
+            default => 'unknown',
+        };
     }
 }
