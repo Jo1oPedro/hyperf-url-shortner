@@ -9,22 +9,32 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
+use Monolog\Formatter\JsonFormatter;
+
 return [
     'default' => [
         'handler' => [
             'class' => Monolog\Handler\StreamHandler::class,
             'constructor' => [
-                'stream' => BASE_PATH . '/runtime/logs/hyperf.log',
-                'level' => Monolog\Logger::DEBUG,
+                //'stream' => BASE_PATH . '/runtime/logs/hyperf.log',
+                //'level' => Monolog\Logger::DEBUG,
+                'stream' => 'php://stdout',
+                'level' => Monolog\Logger::INFO,
             ],
         ],
         'formatter' => [
-            'class' => Monolog\Formatter\LineFormatter::class,
+            /*'class' => Monolog\Formatter\LineFormatter::class,
             'constructor' => [
                 'format' => null,
                 'dateFormat' => 'Y-m-d H:i:s',
                 'allowInlineLineBreaks' => true,
-            ],
+            ],*/
+            'class' => JsonFormatter::class,
+            'constructor' => [
+                'batchMode' => JsonFormatter::BATCH_MODE_JSON,
+                'appendNewLine' => true,
+            ]
         ],
     ],
 ];
